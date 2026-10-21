@@ -1,0 +1,16 @@
+{
+  "name": "元素音乐编曲管理平台",
+  "short_name": "元素音乐",
+  "description": "国潮五行编曲工作站 - 民乐音源·水墨编曲·剪纸频谱·古籍版权",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0c18",
+  "theme_color": "#c9a84c",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>注册 - 元素音乐编曲管理平台</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="https://unpkg.com/element-plus/dist/locale/zh-cn.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    #app {
+      width: 100%;
+      max-width: 450px;
+      padding: 20px;
+    }
+    
+    .register-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      padding: 40px 35px;
+    }
+    
+    .register-header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+    
+    .register-header h1 {
+      font-size: 28px;
+      color: #303133;
+      margin-bottom: 10px;
+    }
+    
+    .register-header p {
+      font-size: 14px;
+      color: #909399;
+    }
+    
+    .register-form {
+      margin-top: 20px;
+    }
+    
+    .register-button {
+      width: 100%;
+      height: 45px;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #606266;
+    }
+    
+    .login-link a {
+      color: #409eff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    
+    .password-match {
+      font-size: 12px;
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .match-success {
+      color: #67c23a;
+    }
+    
+    .match-error {
+      color: #f56c6c;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="register-card">
+      <div class="register-header">
+        <h1>🎵 元素音乐</h1>
+        <p>创建您的账户</p>
+      </div>
+      
+      <el-form 
+        ref="registerFormRef" 
+        :model="registerForm" 
+        :rules="registerRules" 
+        class="register-form"
+        @keyup.enter="handleRegister"
+      >
+        <el-form-item prop="username">
+          <el-input 
+            v-model="registerForm.username" 
+            placeholder="用户名（3-20位字母、数字或下划线）"
+            size="large"
+            prefix-icon="User"
+          />
+        </el-form-item>
+        
+        <el-form-item prop="nickname">
+          <el-input 
+            v-model="registerForm.nickname" 
+            placeholder="昵称（可选）"
+            size="large"
+            prefix-icon="Edit"
+          />
+        </el-form-item>
+        
+        <el-form-item prop="password">
+          <el-input 
+            v-model="registerForm.password" 
+            type="password"
+            placeholder="密码（至少6位）"
+            size="large"
+            prefix-icon="Lock"
+            show-password
+          />
+        </el-form-item>
+        
+        <el-form-item prop="confirmPassword">
+          <el-input 
+            v-model="registerForm.confirmPassword" 
+            type="password"
+            placeholder="确认密码"
+            size="large"
+            prefix-icon="Lock"
+            show-password
+            @input="checkPasswordMatch"
+          />
+          <div 
+            v-if="registerForm.confirmPassword" 
+            :class="['password-match', passwordMatch ? 'match-success' : 'match-error']"
+          >
+            <el-icon v-if="passwordMatch">
+              <CircleCheckFilled />
+            </el-icon>
+            <el-icon v-else>
+              <CircleCloseFilled />
+            </el-icon>
+            {{ passwordMatch ? '密码匹配' : '密码不匹配' }}
+          </div>
+        </el-form-item>
+        
+        <el-form-item>
+          <el-button 
+            type="primary" 
+            size="large"
+            class="register-button"
+            :loading="loading"
+            @click="handleRegister"
+          >
+            注册
+          </el-button>
+        </el-form-item>
+      </el-form>
+      
+      <div class="login-link">
+        已有账户？<a href="/">返回登录</a>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const { createApp, ref, reactive } = Vue;
+    const { 
+      ElForm, ElFormItem, ElInput, ElButton, ElMessage, ElIcon 
+    } = ElementPlus;
+    const { CircleCheckFilled, CircleCloseFilled } = ElementPlusIconsVue;
+    
+    const app = createApp({
+      setup() {
+        const registerFormRef = ref(null);
+        const loading = ref(false);
+        const passwordMatch = ref(false);
+        
+        const registerForm = reactive({
+          username: '',
+          nickname: '',
+          password: '',
+          confirmPassword: ''
+        });
+        
+        const validateUsername = (rule, value, callback) => {
+          if (!value) {
+            callback(new Error('请输入用户名'));
+          } else if (!/^[a-zA-Z0-9_]{3,20}$/.test(value)) {
+            callback(new Error('用户名必须为3-20位字母、数字或下划线'));
+          } else {
+            callback();
+          }
+        };
+        
+        const validatePassword = (rule, value, callback) => {
+          if (!value) {
+            callback(new Error('请输入密码'));
+          } else if (value.length < 6) {
+            callback(new Error('密码长度至少为6位'));
+          } else {
+            callback();
+          }
+        };
+        
+        const validateConfirmPassword = (rule, value, callback) => {
+          if (!value) {
+            callback(new Error('请确认密码'));
+          } else if (value !== registerForm.password) {
+            callback(new Error('两次输入的密码不一致'));
+          } else {
+            callback();
+          }
+        };
+        
+        const registerRules = {
+          username: [{ validator: validateUsername, trigger: 'blur' }],
+          password: [{ validator: validatePassword, trigger: 'blur' }],
+          confirmPassword: [{ validator: validateConfirmPassword, trigger: 'blur' }]
+        };
+        
+        const checkPasswordMatch = () => {
+          if (registerForm.password && registerForm.confirmPassword) {
+            passwordMatch.value = registerForm.password === registerForm.confirmPassword;
+          } else {
+            passwordMatch.value = false;
+          }
+        };
+        
+        const handleRegister = async () => {
+          if (!registerFormRef.value) return;
+          
+          try {
+            await registerFormRef.value.validate();
+            
+            loading.value = true;
+            
+            const response = await fetch('http://156.226.178.124:5653/api/auth/register', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                username: registerForm.username,
+                password: registerForm.password,
+                confirmPassword: registerForm.confirmPassword,
+                nickname: registerForm.nickname || registerForm.username
+              })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              ElMessage.success('注册成功！即将跳转到登录页面...');
+              setTimeout(() => {
+                window.location.href = '/';
+              }, 2000);
+            } else {
+              ElMessage.error(data.error || '注册失败，请重试');
+            }
+          } catch (error) {
+            console.error('注册失败:', error);
+            ElMessage.error('注册失败，请检查网络连接');
+          } finally {
+            loading.value = false;
+          }
+        };
+        
+        return {
+          registerFormRef,
+          loading,
+          passwordMatch,
+          registerForm,
+          registerRules,
+          checkPasswordMatch,
+          handleRegister
+        };
+      }
+    });
+    
+    app.use(ElementPlus);
+    app.component('CircleCheckFilled', CircleCheckFilled);
+    app.component('CircleCloseFilled', CircleCloseFilled);
+    app.mount('#app');
+  </script>
+</body>
+</html>

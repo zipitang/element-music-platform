@@ -1,0 +1,30 @@
+# ---- element-music-platform 忽略 ----
+node_modules/
+_deploy/
+
+# 注意：dist/ 是当前唯一的前端产物（无 client 源码目录），必须保留
+# 若日后补上前端源码，可放开下面这行
+# dist/
+
+# 数据库：含 users 表（账号与密码哈希）及业务数据，禁止进公开仓库
+data/
+server/db/*.db
+*.db
+*.db.bak-*
+*.sqlite
+*.sqlite3
+
+# 用户上传的音频（约占 server/ 的绝大部分）
+server/public/uploads/
+
+# 本地服务日志
+server.log
+*.log
+
+# 环境变量
+.env
+.env.*
+
+# 系统
+.DS_Store
+Thumbs.db
